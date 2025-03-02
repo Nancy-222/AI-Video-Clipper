@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Home - AI Video Clipper</title>
+    <link rel="icon" href="static/img/PendingResults.png">
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic&amp;display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .masthead {
+            height: 330px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .video-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #loading {
+            display: none;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top navbar-light" id="mainNav">
+        <div class="container"><a class="navbar-brand" href="/">AI Video Clipper</a><button
+                data-bs-toggle="collapse" data-bs-target="#navbarResponsive" class="navbar-toggler"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><i
+                    class="fa fa-bars"></i></button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/About">About us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/HowToUse">How to use</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <header class="masthead d-flex align-items-center" style="background-image:url('static/img/Home.jpg');">
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 col-lg-8 mx-auto position-relative">
+                    <div class="site-heading">
+                        <h3>An AI powered snipping tool</h3><span class="subheading">that's suitable to all needs</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid row mx-auto" style="font-family: 'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Select input method</label><br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inputMethod" id="inputMethodURL" value="url" checked>
+                    <label class="form-check-label" for="inputMethodURL">Enter URL</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inputMethod" id="inputMethodUpload" value="upload">
+                    <label class="form-check-label" for="inputMethodUpload">Upload video</label>
+                </div>
+            </div>
+            <form class="needs-validation" id="videoclipperformurl" action="/" method='POST' novalidate>
+                <div class="mb-3 input-method" id="urlInput">
+                    <label for="videourl" class="form-label">Enter one or many video URLs separated by a comma.</label>
+                    <input class="form-control" type="text" id="videourl" name="videourl" placeholder="https://example.com/video.mp4" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please enter a URL.
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="input1" class="form-label">Enter your text prompt</label>
+                    <input type="text" class="form-control" name="prompt" placeholder="Baby crying..." required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please enter your prompt.
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="input1" class="form-label">Enter the required sample rate (frames per second)</label>
+                    <input type="number" class="form-control" name="fps" value="1" placeholder="1" min="1" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please enter a sample rate (should be a positive value).
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <button style="background-color:rgb(57, 97, 114)" class="btn btn-secondary rounded clearButton" type="button">Clear</button>
+                    <button style="background-color:rgb(57, 97, 114)" class="btn btn-secondary rounded" type="submit">Start snipping</button>
+                </div>
+            </form>
+
+            <form class="needs-validation" id="videoclipperformupload" style="display: none;" action="/" method='POST' enctype="multipart/form-data" novalidate>
+                <div class="mb-3 input-method" id="uploadInput">
+                    <label for="formFileMultiple" class="form-label">Upload one or more video files</label>
+                    <input class="form-control" type="file" id="formFileMultiple" name="videos" accept="video/*" multiple required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please select at least one file.
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="input1" class="form-label">Enter your text prompt</label>
+                    <input type="text" class="form-control" name="prompt" placeholder="Baby crying..." required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please enter your prompt.
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="input1" class="form-label">Enter the required sample rate (frames per second)</label>
+                    <input type="number" class="form-control" name="fps" value="1" placeholder="1" min="1" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please enter a sample rate (should be a positive value).
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <button style="background-color:rgb(57, 97, 114)" class="btn btn-secondary rounded clearButton" type="button">Clear</button>
+                    <button style="background-color:rgb(57, 97, 114)" class="btn btn-secondary rounded" type="submit">Start snipping</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-5">
+            <div class="mb-3">
+                <label class="form-label">Results will appear here</label>
+                <button id="download-button" style="padding:5px;background-color:rgb(57, 97, 114); position: relative;" class="btn btn-secondary rounded" type="downloadbutton">Download all<img src="static/img/Download_icon.png" style="width:17.5px;height:17.5px;margin:0 10px;margin-right:0;"></button>
+                <div id="loading" class="my-5">
+                    <div class="spinner"></div>
+                </div>
+                <div class="center">
+                <button id="Cancel-button" style="background-color:rgb(57, 97, 114) ; display:none;" class="btn btn-secondary rounded " type="submit">Cancel</button>
+                </div>
+                <div id="result-videos" class="d-flex justify-content-center align-items-center w-100 video-container">
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <footer>
+        <div class="container" style="font-family: 'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;">
+            <div class="row">
+                <div class="col-md-10 col-lg-8 mx-auto">
+                    <p class="text-muted copyright">Copyright&nbsp;©&nbsp;AI Video Clipper 2025</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/clean-blog.js"></script>
+    <script>
+        $(document).ready(() => {
+            $('#videoclipperformurl').submit((event) => {
+                event.preventDefault();
+                const outputVideosContainer = $('#result-videos');
+                outputVideosContainer.empty();
+                var formData = $('#videoclipperformurl').serialize();
+                $('#loading').show();
+                $('#Cancel-button').show();
+
+                $.ajax({
+                type: 'POST',
+                url: '/',
+                data: formData,
+                success: response => {
+                    $('#loading').hide();
+                    $('#Cancel-button').hide();
+                    if(response.error) {return;}
+                    const outputVideos = response.videos;
+                    outputVideosContainer.empty();
+                    outputVideos.forEach(video => {
+                        outputVideosContainer.append(`<video class="w-100" controls><source src="static/results/${video}" type="video/mp4"></video><br>`);
+                    });
+                },
+                error: error => {
+                    $('#loading').hide();
+                    $('#Cancel-button').hide();
+                    console.log(error);
+                }
+                });
+            });
+
+            $('#videoclipperformupload').submit((event) => {
+                event.preventDefault();
+                const outputVideosContainer = $('#result-videos');
+                outputVideosContainer.empty();
+                $('#loading').show();
+                $('#Cancel-button').show();
+                
+                $.ajax({
+                type: 'POST',
+                url: '/',
+                data: new FormData($('#videoclipperformupload').get(0)),
+                contentType: "multipart/form-data",
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: response => {
+                    $('#loading').hide();
+                    $('#Cancel-button').hide();
+                    if(response.error) {return;}
+                    const outputVideos = response.videos;
+                    outputVideosContainer.empty();
+                    outputVideos.forEach(video => {
+                        outputVideosContainer.append(`<video class="w-100" controls><source src="static/results/${video}" type="video/mp4"></video><br>`);
+                    });
+                },
+                error: error => {
+                    $('#loading').hide();
+                    $('#Cancel-button').hide();
+                    console.log(error);
+                }
+                });
+            });
+            $('#Cancel-button').on('click',()=>{
+                $.ajax({
+                type: 'POST',
+                url: '/cancel',
+                data: '',
+                success: response => {
+                    if(response.error) {return;}
+                    console.log(response)
+                },
+                error: error => {
+                    $('#loading').hide();
+                    $('#Cancel-button').hide();
+                    console.log(error);
+                }
+                });
+            });
+        });
+    </script>
+    <script>
+        (() => {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            const forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // let input = document.getElementById('formFileMultiple')
+        // input.addEventListener('change', function() {
+        //     for (const file of input.files){
+        //         if (!file.type.includes("video/"))
+        //         {
+        //             input.value = ''
+        //         }
+        //     }
+        // })
+
+
+        // Add event listener to the clear button
+        $('.clearButton').on('click', function () {
+            // Select the input fields you want to clear
+            var inputs = document.querySelectorAll('input[type="text"], input[type="number"], input[type="file"]');
+
+            // Loop through each input field and clear its value
+            inputs.forEach(function (input) {
+                input.value = '';
+            });
+        });
+    });
+</script>
+<!-- <script>
+    function validateURL(urlInput) {
+        
+        var urlPattern = /^(https?:\/\/)?([\w.]+)\.([a-z]{2,6}\.?)(\/[\w#!:.?+=&%@!\-\/]*)?$/i;
+        
+        if (!(urlPattern.test(urlInput))) {
+            document.getElementById('formFileURL').value = ""
+        }
+    }
+
+    document.getElementById('formFileURL').addEventListener('change', () => {
+        validateURL(document.getElementById('formFileURL').value)
+    })
+</script> -->
+<script>
+    // Get references to the container and button
+    const container = document.getElementById('result-videos');
+    const button = document.getElementById('download-button');
+
+    // Function to check if container has children and enable/disable button accordingly
+    function updateButtonStatus() {
+        if (container.children.length > 0) {
+            button.disabled = false; // Enable button
+        } else {
+            button.disabled = true; // Disable button
+        }
+    }
+
+    // Call the function initially to set the initial button status
+    updateButtonStatus();
+
+    // Listen for changes in the container's children
+    container.addEventListener('DOMSubtreeModified', updateButtonStatus);
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('input[type=radio][name=inputMethod]').forEach(input => {
+        input.addEventListener('change', function () {
+            if (this.value === 'url') {
+                $('#videoclipperformupload').hide();
+                $('#videoclipperformurl').show();
+            } else if (this.value === 'upload') {
+                $('#videoclipperformurl').hide();
+                $('#videoclipperformupload').show();
+            }
+        });
+    });
+});
+
+</script>
+</body>
+
+</html>
